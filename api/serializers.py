@@ -2,6 +2,7 @@ from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
 from .models import User
+from .utils import apply_watermark
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -20,6 +21,12 @@ class UserSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
+        try:
+            avatar = validated_data.pop('avatar')
+            validated_data['avatar'] = apply_watermark(avatar)
+        except Exception as e:
+            raise serializers.ValidationError("Error processing image: %s" % e)
+
         user = User.objects.create(
             email=validated_data['email'],
             first_name=validated_data['first_name'],

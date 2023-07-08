@@ -29,7 +29,7 @@ class User(AbstractBaseUser):
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30)
     gender = models.CharField(max_length=1, choices=CHOICE_GENDER)
-    avatar = models.ImageField(upload_to='avatars/', default='default.jpg', blank=True, null=True)
+    avatar = models.ImageField(upload_to='avatars/', default='default.jpg')
 
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
@@ -37,7 +37,7 @@ class User(AbstractBaseUser):
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['first_name', 'last_name', 'gender']
+    REQUIRED_FIELDS = ['first_name', 'last_name', 'gender', 'avatar']
 
     def __str__(self):
         return self.email
