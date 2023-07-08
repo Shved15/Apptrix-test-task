@@ -6,6 +6,7 @@ django-filter==23.2
 psycopg2-binary==2.9.6
 
 drf-yasg==1.21.6
+coreapi==2.3.3
 pillow==10.0.0
 geopy==2.3.0
 

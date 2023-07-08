@@ -2,12 +2,13 @@ from django.contrib import admin
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from api.views import UserViewSet
+from api.views import UserViewSet, UserListViewSet
 
 from .utils import schema_view
 
 router = DefaultRouter()
 router.register(r'clients/create', UserViewSet, basename='create-client')
+router.register(r'list', UserListViewSet, basename='user-list')
 
 
 urlpatterns = [
