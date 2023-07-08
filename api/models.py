@@ -41,3 +41,9 @@ class User(AbstractBaseUser):
 
     def __str__(self):
         return self.email
+
+
+class Match(models.Model):
+    from_user = models.ForeignKey(User, related_name='matches_from', on_delete=models.CASCADE)
+    to_user = models.ForeignKey(User, related_name='matches_to', on_delete=models.CASCADE)
+    matched = models.BooleanField(default=False)

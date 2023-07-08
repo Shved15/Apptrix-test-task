@@ -2,13 +2,14 @@ from django.contrib import admin
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from api.views import UserViewSet, UserListViewSet
+from api.views import MatchViewSet, UserListViewSet, UserViewSet
 
 from .utils import schema_view
 
 router = DefaultRouter()
 router.register(r'clients/create', UserViewSet, basename='create-client')
 router.register(r'list', UserListViewSet, basename='user-list')
+router.register(r'clients/(?P<from_user_id>\d+)/match', MatchViewSet, basename='match')
 
 
 urlpatterns = [

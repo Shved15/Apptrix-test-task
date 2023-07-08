@@ -8,11 +8,20 @@ env = environ.Env(
     SECRET_KEY=(str),
     DOMAIN_NAME=(str),
 
+    REDIS_HOST=(str),
+    REDIS_PORT=(str),
+
     NAME_DB=(str),
     USER_DB=(str),
     PASSWORD_DB=(str),
     HOST_DB=(str),
     PORT_DB=(str),
+
+    EMAIL_HOST=(str),
+    EMAIL_PORT=(int),
+    EMAIL_HOST_USER=(str),
+    EMAIL_HOST_PASSWORD=(str),
+    EMAIL_USE_SSL=(bool),
 )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -29,7 +38,7 @@ DEBUG = env('DEBUG')
 
 ALLOWED_HOSTS = ['*']
 
-# DOMAIN_NAME = env('DOMAIN_NAME')
+DOMAIN_NAME = env('DOMAIN_NAME')
 
 
 # Application definition
@@ -46,6 +55,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'drf_yasg',
     'django_filters',
+    'django_celery_results',
 
     # my apps
     'api',
@@ -81,6 +91,20 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'SocialMedia.wsgi.application'
 
+# redis
+REDIS_HOST = env('REDIS_HOST')
+REDIS_PORT = env('REDIS_PORT')
+
+# # cache
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django_redis.cache.RedisCache',
+#         'LOCATION': f'redis://{REDIS_HOST}:{REDIS_PORT}/1',
+#         'OPTIONS': {
+#             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+#         }
+#     }
+# }
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
@@ -152,3 +176,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # User
 AUTH_USER_MODEL = 'api.User'
+
+# celery
+CELERY_BROKER_URL = f'redis://{REDIS_HOST}:{REDIS_PORT}'
+CELERY_RESULT_BACKEND = f'redis://{REDIS_HOST}:{REDIS_PORT}'
+
+# Send Email
+EMAIL_HOST = env('EMAIL_HOST')
+EMAIL_PORT = env('EMAIL_PORT')
+EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+EMAIL_USE_SSL = env('EMAIL_USE_SSL')

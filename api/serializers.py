@@ -1,7 +1,7 @@
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
-from .models import User
+from .models import Match, User
 from .utils import apply_watermark
 
 
@@ -54,3 +54,22 @@ class UserListSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('first_name', 'last_name', 'gender', 'avatar')
+
+
+class MatchSerializer(serializers.ModelSerializer):
+    from_user = serializers.HiddenField(
+        default=serializers.CurrentUserDefault()
+    )
+
+    class Meta:
+        model = Match
+        fields = ['from_user', 'to_user']
+
+    def validate(self, attrs):
+        if attrs['from_user'] == attrs['to_user']:
+            raise serializers.ValidationError({"detail": "You can't like yourself."})
+
+        if Match.objects.filter(from_user=attrs['from_user'], to_user=attrs['to_user']).exists():
+            raise serializers.ValidationError({"detail": "You already liked this user."})
+
+        return attrs
