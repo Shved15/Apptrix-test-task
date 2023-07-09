@@ -1,4 +1,6 @@
 from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 from rest_framework import serializers
 
 from .models import Match, User
@@ -6,26 +8,43 @@ from .utils import apply_watermark
 
 
 class UserSerializer(serializers.ModelSerializer):
+    """Сериализатор для модели User."""
+
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
     password2 = serializers.CharField(write_only=True, required=True)
 
+    def validate_email(self, value):
+        """Проверяет валидность email-адреса."""
+        try:
+            validate_email(value)
+        except ValidationError:
+            raise serializers.ValidationError("Введен некорректный адрес электронной почты!")
+        return value
+
     def validate_gender(self, value):
+        """Проверяет валидность значения пола."""
         if value not in dict(User.CHOICE_GENDER).keys():
-            raise serializers.ValidationError("Invalid gender value")
+            raise serializers.ValidationError("Введено некорректное значение пола пользователя!")
         return value
 
     def validate(self, attrs):
+        """Проверяет, что значения полей 'password' и 'password2' совпадают."""
         if attrs['password'] != attrs['password2']:
-            raise serializers.ValidationError({"password": "Password fields didn't match."})
-
+            raise serializers.ValidationError({"password": "Пароли не совпадают!"})
         return attrs
 
     def create(self, validated_data):
-        try:
-            avatar = validated_data.pop('avatar')
-            validated_data['avatar'] = apply_watermark(avatar)
-        except Exception as e:
-            raise serializers.ValidationError("Error processing image: %s" % e)
+        """Создает нового пользователя, применяет водяной знак к изображению аватара и сохраняет пользователя."""
+        avatar = validated_data.get('avatar')
+        if avatar:
+            try:
+                avatar = validated_data.pop('avatar')
+                validated_data['avatar'] = apply_watermark(avatar)
+            except Exception as e:
+                raise serializers.ValidationError("Ошибка обработки изображения: %s" % e)
+        else:
+            # Если аватар отсутствует, присваиваем дефолтный аватар
+            validated_data['avatar'] = 'default/default_avatar.png'
 
         user = User.objects.create(
             email=validated_data['email'],
@@ -51,25 +70,28 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserListSerializer(serializers.ModelSerializer):
+    """Сериализатор для модели User - вывод списка пользователей."""
+
     class Meta:
         model = User
-        fields = ('first_name', 'last_name', 'gender', 'avatar')
+        fields = ('first_name', 'last_name', 'gender', 'avatar', 'location')
 
 
 class MatchSerializer(serializers.ModelSerializer):
-    from_user = serializers.HiddenField(
-        default=serializers.CurrentUserDefault()
-    )
+    """Сериализатор для модели Match."""
+
+    from_user = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     class Meta:
         model = Match
         fields = ['from_user', 'to_user']
 
     def validate(self, attrs):
+        """Проверяет, что пользователь не лайкает себя или повторно других пользователей."""
         if attrs['from_user'] == attrs['to_user']:
-            raise serializers.ValidationError({"detail": "You can't like yourself."})
+            raise serializers.ValidationError({"detail": "Вы не можете лайкнуть сами себя!"})
 
         if Match.objects.filter(from_user=attrs['from_user'], to_user=attrs['to_user']).exists():
-            raise serializers.ValidationError({"detail": "You already liked this user."})
+            raise serializers.ValidationError({"detail": "Вам уже нравился данный пользователь!"})
 
         return attrs

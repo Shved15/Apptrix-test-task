@@ -51,11 +51,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'django.contrib.gis',
+
     # other apps
     'rest_framework',
     'drf_yasg',
     'django_filters',
     'django_celery_results',
+
 
     # my apps
     'api',
@@ -95,23 +98,12 @@ WSGI_APPLICATION = 'SocialMedia.wsgi.application'
 REDIS_HOST = env('REDIS_HOST')
 REDIS_PORT = env('REDIS_PORT')
 
-# # cache
-# CACHES = {
-#     'default': {
-#         'BACKEND': 'django_redis.cache.RedisCache',
-#         'LOCATION': f'redis://{REDIS_HOST}:{REDIS_PORT}/1',
-#         'OPTIONS': {
-#             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-#         }
-#     }
-# }
-
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'NAME': env('NAME_DB'),
         'USER': env('USER_DB'),
         'PASSWORD': env('PASSWORD_DB'),
