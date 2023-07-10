@@ -1,3 +1,4 @@
+from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import D
 from django_filters.rest_framework import DjangoFilterBackend
@@ -34,8 +35,8 @@ class UserListViewSet(ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticated]  # только для авторизованных пользователей
 
     @swagger_auto_schema(manual_parameters=[
-        openapi.Parameter('longitude', openapi.IN_QUERY, type=openapi.TYPE_NUMBER),
         openapi.Parameter('latitude', openapi.IN_QUERY, type=openapi.TYPE_NUMBER),
+        openapi.Parameter('longitude', openapi.IN_QUERY, type=openapi.TYPE_NUMBER),
         openapi.Parameter('radius', openapi.IN_QUERY, type=openapi.TYPE_NUMBER)
     ])
     def list(self, request, *args, **kwargs):
@@ -48,8 +49,8 @@ class UserListViewSet(ReadOnlyModelViewSet):
         queryset = super().get_queryset()
         user = self.request.user
         radius = self.request.query_params.get('radius', None)
-        longitude = self.request.query_params.get('longitude', None)
         latitude = self.request.query_params.get('latitude', None)
+        longitude = self.request.query_params.get('longitude', None)
 
         if user.is_authenticated:
             # Если пользователь передает в параметрах широту и долготу, то:
@@ -58,11 +59,20 @@ class UserListViewSet(ReadOnlyModelViewSet):
                 user.location = Point(float(longitude), float(latitude))
                 user.save()
 
+            # Если параметр радиуса передан, то:
             if radius:
+                # Получаем текущее местоположение пользователя, если оно есть
                 point = user.location if user.location else None
                 if point:
                     # Фильтрация queryset по радиусу относительно местоположения пользователя
                     queryset = queryset.filter(location__distance_lte=(point, D(km=float(radius))))
+
+                    # Добавляем к queryset вычисляемое поле "distance", представляющее расстояние до
+                    # каждого пользователя от заданной точки.
+                    queryset = queryset.annotate(distance=Distance('location', point))
+
+        # Исключаем из queryset пользователей без местоположения
+        queryset = queryset.exclude(location__isnull=True)
 
         return queryset
 

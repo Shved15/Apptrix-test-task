@@ -72,9 +72,31 @@ class UserSerializer(serializers.ModelSerializer):
 class UserListSerializer(serializers.ModelSerializer):
     """Сериализатор для модели User - вывод списка пользователей."""
 
+    distance = serializers.SerializerMethodField()
+
+    def get_distance(self, obj):
+        """Метод возвращает расстояние до объекта, если таковое существует"""
+        if hasattr(obj, 'distance'):
+            return obj.distance.km
+
+    def to_representation(self, instance):
+        """Метод проверяет есть ли радиус в запросе, если есть возвращает расстояние до пользователей,
+        у которых он есть, если нет, то удаляем поле distance из response"""
+        request = self.context.get('request')
+        radius = request.GET.get('radius') if request else None
+
+        # вызываем оригинальный to_representation
+        ret = super().to_representation(instance)
+
+        # удаляем поле 'distance', если радиус не указан
+        if not radius and 'distance' in ret:
+            ret.pop('distance')
+
+        return ret
+
     class Meta:
         model = User
-        fields = ('first_name', 'last_name', 'gender', 'avatar', 'location')
+        fields = ('first_name', 'last_name', 'gender', 'avatar', 'location', 'distance')
 
 
 class MatchSerializer(serializers.ModelSerializer):
