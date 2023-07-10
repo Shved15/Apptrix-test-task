@@ -17,6 +17,7 @@ from .tasks import send_match_email
 class UserViewSet(ModelViewSet):
     """ViewSet для модели User."""
 
+    http_method_names = ('post',)
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
@@ -80,6 +81,7 @@ class UserListViewSet(ReadOnlyModelViewSet):
 class MatchViewSet(ModelViewSet):
     """ViewSet для модели Match."""
 
+    http_method_names = ('post',)
     queryset = Match.objects.all()
     serializer_class = MatchSerializer
 
