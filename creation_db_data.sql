@@ -1,0 +1,7 @@
+INSERT INTO api_user (password, email, first_name, last_name, gender, avatar, location, is_active, is_admin)
+VALUES
+('pbkdf2_sha256$260000$VnP7hQ00Ch3LpiuffQklY6$WP/koT/eDRtEQPMBM1tPQqM4Yjs41qVHmIJONlPXsg4=', 'user1@example.com', 'User1', 'Name1', 'M', 'default/default_avatar.png', '0101000020E61000005F4049FD03E44B404495A5344FD14240', True, False),
+('pbkdf2_sha256$260000$oaaCTG4yj2vQnsaVwcHUvD$Bq6/lV/2bz4qpf8AKvjZh8IptXBsM3QoGcHVPTSPyS8=', 'user2@example.com', 'User2', 'Name2', 'W', 'default/default_avatar.png', '0101000020E6100000C484E0C5CDDE4B40C23EB95149D54240', True, False),
+('pbkdf2_sha256$260000$D1XPQzyogczSuqIWbwNikp$MdDP30ftQJyZRn0AfcrrQTWRx15z30hAvt8eEO6S6dI=', 'user3@example.com', 'User3', 'Name3', 'M', 'default/default_avatar.png', '0101000020E6100000BA0298D114DE4B400BF240A8E5D34240', True, False),
+('pbkdf2_sha256$260000$pW6yysq4boIa6vcARYbaIU$tbk8nBytiyb9QkCNQEfpzvmWDSU1ybyyxLukTZk3gdI=', 'user4@example.com', 'User4', 'Name4', 'W', 'default/default_avatar.png', '0101000020E6100000232B7944B0E24B4010B3B8A915C94240', True, False),
+('pbkdf2_sha256$260000$QVe7O8de8JNvhCyGBHzVZY$xmzAe+SP6ZDXik/eXfjahhBRXE+pJX/nBgADqHY0e3E=', 'user5@example.com', 'User5', 'Name5', 'M', 'default/default_avatar.png', '0101000020E61000002AF33FD1D5F14B40B7516A0EA2B44240', True, False);

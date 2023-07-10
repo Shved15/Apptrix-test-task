@@ -1,0 +1,56 @@
+version: '3'
+services:
+  app:
+    build: .
+    command: sh -c './cmds.sh && python3 manage.py runserver 0.0.0.0:8000'
+    volumes:
+      - .:/app
+    ports:
+      - 8000:8000
+    environment:
+      - DB_HOST=db
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - CELERY_BROKER=redis://redis:6379/0
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - redis
+  db:
+    image: postgis/postgis:latest
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASS}
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+  redis:
+    image: redis:latest
+    ports:
+      - 6379:6379
+  celery:
+    build: .
+    command: celery -A SocialMedia worker -l INFO
+    volumes:
+      - .:/app
+    environment:
+      - DB_HOST=db
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - CELERY_BROKER=redis://redis:6379/0
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - redis
+volumes:
+  dbdata:

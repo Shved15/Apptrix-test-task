@@ -82,10 +82,6 @@ class MatchSerializer(serializers.ModelSerializer):
 
     from_user = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
-    class Meta:
-        model = Match
-        fields = ['from_user', 'to_user']
-
     def validate(self, attrs):
         """Проверяет, что пользователь не лайкает себя или повторно других пользователей."""
         if attrs['from_user'] == attrs['to_user']:
@@ -95,3 +91,7 @@ class MatchSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"detail": "Вам уже нравился данный пользователь!"})
 
         return attrs
+
+    class Meta:
+        model = Match
+        fields = ['from_user', 'to_user']

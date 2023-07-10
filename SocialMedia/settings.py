@@ -11,11 +11,11 @@ env = environ.Env(
     REDIS_HOST=(str),
     REDIS_PORT=(str),
 
-    NAME_DB=(str),
-    USER_DB=(str),
-    PASSWORD_DB=(str),
-    HOST_DB=(str),
-    PORT_DB=(str),
+    DB_NAME=(str),
+    DB_USER=(str),
+    DB_PASS=(str),
+    DB_HOST=(str),
+    DB_PORT=(str),
 
     EMAIL_HOST=(str),
     EMAIL_PORT=(int),
@@ -104,11 +104,11 @@ REDIS_PORT = env('REDIS_PORT')
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': env('NAME_DB'),
-        'USER': env('USER_DB'),
-        'PASSWORD': env('PASSWORD_DB'),
-        'HOST': env('HOST_DB'),
-        'PORT': env('PORT_DB'),
+        'NAME': env('DB_NAME'),
+        'USER': env('DB_USER'),
+        'PASSWORD': env('DB_PASS'),
+        'HOST': env('DB_HOST'),
+        'PORT': env('DB_PORT'),
     }
 }
 

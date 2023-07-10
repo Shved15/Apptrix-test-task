@@ -1,3 +1,4 @@
+from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import D
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg import openapi
@@ -25,27 +26,43 @@ class UserListViewSet(ReadOnlyModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserListSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['gender', 'first_name', 'last_name']  # поля для фильтрации
+    filterset_fields = {
+        'gender': ['iexact'],
+        'first_name': ['iexact'],
+        'last_name': ['iexact']
+    }  # поля для фильтрации без учета регистра но сохраняя уникальность (сделано из-за тестовых данных)
     permission_classes = [IsAuthenticated]  # только для авторизованных пользователей
 
     @swagger_auto_schema(manual_parameters=[
+        openapi.Parameter('longitude', openapi.IN_QUERY, type=openapi.TYPE_NUMBER),
+        openapi.Parameter('latitude', openapi.IN_QUERY, type=openapi.TYPE_NUMBER),
         openapi.Parameter('radius', openapi.IN_QUERY, type=openapi.TYPE_NUMBER)
     ])
     def list(self, request, *args, **kwargs):
-        """Возвращает список пользователей с возможностью фильтрации по радиусу."""
+        """Возвращает список пользователей с возможностью фильтрации по радиусу и координатам."""
         return super().list(request, *args, **kwargs)
 
     def get_queryset(self):
-        """Возвращает queryset пользователей с примененным фильтром по радиусу, если пользователь аутентифицирован."""
+        """Возвращает queryset пользователей с примененным фильтром по радиусу или координатам,
+        если пользователь аутентифицирован."""
         queryset = super().get_queryset()
         user = self.request.user
-        radius = self.request.query_params.get('radius', None)  # Получение значения query-параметра 'radius'
+        radius = self.request.query_params.get('radius', None)
+        longitude = self.request.query_params.get('longitude', None)
+        latitude = self.request.query_params.get('latitude', None)
 
-        # Проверка аутентификации пользователя и наличия значения 'radius'
-        if user.is_authenticated and radius:
-            point = user.location
-            # Фильтрация queryset по радиусу
-            queryset = queryset.filter(location__distance_lte=(point, D(km=float(radius))))
+        if user.is_authenticated:
+            # Если пользователь передает в параметрах широту и долготу, то:
+            if longitude and latitude:
+                # Обновляется местоположения пользователя в базе данных
+                user.location = Point(float(longitude), float(latitude))
+                user.save()
+
+            if radius:
+                point = user.location if user.location else None
+                if point:
+                    # Фильтрация queryset по радиусу относительно местоположения пользователя
+                    queryset = queryset.filter(location__distance_lte=(point, D(km=float(radius))))
 
         return queryset
 
