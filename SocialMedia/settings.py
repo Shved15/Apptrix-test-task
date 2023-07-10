@@ -50,7 +50,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
     'django.contrib.gis',
 
     # other apps
@@ -58,7 +57,6 @@ INSTALLED_APPS = [
     'drf_yasg',
     'django_filters',
     'django_celery_results',
-
 
     # my apps
     'api',
